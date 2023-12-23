@@ -1,0 +1,29 @@
+.player {
+    display: flex;
+    flex-direction: column;  
+    justify-content: center; 
+    align-items: center;
+}
+
+.player > img {
+    width: 3rem;
+    height: 5rem;
+    
+}
+
+.player > div{
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 2rem;
+    border-radius: 0.625rem;
+    border: 1px solid #E6E6E6;
+    background: #FFF;
+
+}
+
+.player > div > h1,p {
+    color: #000;
+    margin: 0;
+}
+
