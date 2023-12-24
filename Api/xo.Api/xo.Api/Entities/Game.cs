@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Drawing;
 
 namespace xo.Api.Entities
 {
@@ -53,10 +54,18 @@ namespace xo.Api.Entities
     public class GameReadDto
     {
         public Guid Game_Id { get; set; }
-        public string Board { get; set; } = "123456789";
+        public string Board { get; set; } = "#########";
         public Player Player1 { get; set; } = null!;
         public Player? Player2 { get; set; } = null;
         public Player CurrentTurn { get; set; } = null!;
         public Player? Winner { get; set; } = null;
+    }
+
+    public class GamePlayDto
+    {
+        required public Guid Game_Id { get; set; }
+        required public Guid Player_Id { get; set; }
+        required public Point Position { get; set; }
+
     }
 }
