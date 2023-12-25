@@ -5,10 +5,6 @@ namespace xo.Api.Entities
     public partial class Game
     {
 
-        public Game()
-        {
-            Game_Id = Guid.NewGuid();
-        }
         public GameReadDto ToDto(IEnumerable<Player> players)
         {
             return new GameReadDto()

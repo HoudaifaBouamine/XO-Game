@@ -1,11 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using xo.Api.Dtos.GameDtos;
 
 namespace xo.Api.Entities
 {
     public partial class Game
     {
-
+        [Key]
         public Guid Game_Id { get; set; }
 
         public string Board { get; set; } = "#########";

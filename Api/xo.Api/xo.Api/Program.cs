@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using xo.Api.Data;
 using xo.Api.Dtos.GameDtos;
 using xo.Api.Entities;
 
@@ -7,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<AppDbContext>();
+builder.Services.AddSingleton<DataLayer>();
 var app = builder.Build();
 
 
@@ -16,19 +17,19 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.MapGet("/games", (AppDbContext db) =>
+app.MapGet("/games", (DataLayer db) =>
 {
     return from g in db.Games.ToList() select g.ToDto(db.Players);
 });
 
-app.MapGet("/players", (AppDbContext db) =>
+app.MapGet("/players", (DataLayer db) =>
 {
     return from p in db.Players.ToList() select p.ToDto();
 });
 
 
 
-app.MapGet("/players/new", (AppDbContext db) =>
+app.MapGet("/players/new", async (DataLayer db) =>
 {
     var player = new Player
     {
@@ -38,18 +39,21 @@ app.MapGet("/players/new", (AppDbContext db) =>
 
     db.Players.Add(player);
 
+    await db.SaveChangesAsync();
+
     return Results.Ok(player.ToDto());
 });
 
-app.MapGet("/games/join/{player_id}", (AppDbContext db, Guid player_id) =>
+app.MapGet("/games/join/{player_id}", async (DataLayer db, Guid player_id) =>
 {
 
-    Game? game = db.Games.Where(g => g.Player2_Id is null).FirstOrDefault();
+    Game? game = db.Games.Where(g => g.Player2_Id == null).FirstOrDefault();
 
     if(game == null)
     {
         game = new Game()
         {
+            Game_Id = Guid.NewGuid(),
             Player1_Id = player_id,
             CurrentTurn_Id = player_id
         };
@@ -62,11 +66,12 @@ app.MapGet("/games/join/{player_id}", (AppDbContext db, Guid player_id) =>
     }
 
 
+    await db.SaveChangesAsync();
 
     return Results.Ok( game.ToDto(db.Players) );
 });
 
-app.MapGet("/games/{game_id}", (AppDbContext db,Guid game_id) =>
+app.MapGet("/games/{game_id}", (DataLayer db,Guid game_id) =>
 {
     Game? game = db.Games.Where(g => g.Game_Id == game_id).FirstOrDefault();
 
@@ -78,7 +83,7 @@ app.MapGet("/games/{game_id}", (AppDbContext db,Guid game_id) =>
     return Results.Ok(game.ToDto(db.Players));
 });
 
-app.MapPut("/games/play", (AppDbContext db, [FromBody] GamePlayDto play) =>
+app.MapPut("/games/play", async (DataLayer db, [FromBody] GamePlayDto play) =>
 {
     Game? game = db.Games.Where(g => g.Game_Id == play.Game_Id).FirstOrDefault();
     
@@ -138,39 +143,10 @@ app.MapPut("/games/play", (AppDbContext db, [FromBody] GamePlayDto play) =>
         game.IsGameOver = true;
     }
 
+    await db.SaveChangesAsync();
+
     return Results.Ok(game.ToDto(db.Players));
 });
 
 app.Run();
-
-class AppDbContext
-{
-    public List<Player> Players { get; set; } 
-    public List<Game> Games { get; set; } 
-
-    public AppDbContext()
-    {
-        Players = new List<Player>()
-        {
-            new Player(),
-            new Player(),
-            new Player()
-        };
-
-        Games = new List<Game>()
-        {
-
-            new Game()
-            {
-                Player1_Id = Players[0].Player_Id,
-                Winner = null,
-                CurrentTurn_Id = Players[0].Player_Id,
-                
-                
-
-            }
-        };
-    }
-
-}
 
