@@ -1,14 +1,9 @@
-﻿using xo.Api.Dtos.PlayerDtos;
-
-namespace xo.Api.Entities
+﻿namespace xo.Api.Dtos.PlayerDtos
 {
-    public partial class Player
+    public class PlayerDto
     {
-
         public Guid Player_Id { get; set; }
-
         public string Name { get; set; } = "";
 
     }
-
 }

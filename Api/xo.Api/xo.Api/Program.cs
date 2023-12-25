@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using xo.Api.Dtos.GameDtos;
 using xo.Api.Entities;
-using xo.Api.Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,7 @@ app.UseHttpsRedirection();
 
 app.MapGet("/games", (AppDbContext db) =>
 {
-    return from g in db.Games.ToList() select g.ToDto();
+    return from g in db.Games.ToList() select g.ToDto(db.Players);
 });
 
 app.MapGet("/players", (AppDbContext db) =>
@@ -43,11 +43,27 @@ app.MapGet("/players/new", (AppDbContext db) =>
 
 app.MapGet("/games/join/{player_id}", (AppDbContext db, Guid player_id) =>
 {
-    GameManager gameManager = new GameManager();
-    var game = gameManager.JoinGame(player_id);
-    db.Games.Add(game);
 
-    return Results.Ok( game.ToDto() );
+    Game? game = db.Games.Where(g => g.Player2_Id is null).FirstOrDefault();
+
+    if(game == null)
+    {
+        game = new Game()
+        {
+            Player1_Id = player_id,
+            CurrentTurn_Id = player_id
+        };
+
+        db.Games.Add(game);
+    }
+    else
+    {
+        game.Player2_Id = player_id;
+    }
+
+
+
+    return Results.Ok( game.ToDto(db.Players) );
 });
 
 app.MapGet("/games/{game_id}", (AppDbContext db,Guid game_id) =>
@@ -59,7 +75,7 @@ app.MapGet("/games/{game_id}", (AppDbContext db,Guid game_id) =>
         return Results.NotFound("Game Not Found");
     }
 
-    return Results.Ok(game.ToDto());
+    return Results.Ok(game.ToDto(db.Players));
 });
 
 app.MapPut("/games/play", (AppDbContext db, [FromBody] GamePlayDto play) =>
@@ -69,6 +85,11 @@ app.MapPut("/games/play", (AppDbContext db, [FromBody] GamePlayDto play) =>
     if(game == null)
     {
         return Results.BadRequest("game not found");
+    }
+
+    if(game.Winner_Id is not null || game.IsGameOver == true)
+    {
+        return Results.BadRequest("game over");
     }
 
     if(game.CurrentTurn_Id != play.Player_Id)
@@ -90,31 +111,66 @@ app.MapPut("/games/play", (AppDbContext db, [FromBody] GamePlayDto play) =>
     if (game.Player1_Id == play.Player_Id)
     {
         sbuilder[position] = 'X';
+        game.CurrentTurn_Id = game.Player2_Id!.Value;
     }
     else
     {
         sbuilder[position] = 'O';
+        game.CurrentTurn_Id = game.Player1_Id;
     }
 
     game.Board = sbuilder.ToString();
 
+    var winner = Game.CheckWinner(game.Board);
+
+    if (winner == Game.enWinner.X_Win)
+    {
+        game.Winner_Id = game.Player1_Id;
+        game.IsGameOver = true;
+    }
+    else if (winner == Game.enWinner.O_Win)
+    {
+        game.Winner_Id = game.Player2_Id;
+        game.IsGameOver = true;
+    }
+    else if(winner == Game.enWinner.Draw)
+    {
+        game.IsGameOver = true;
+    }
+
+    return Results.Ok(game.ToDto(db.Players));
 });
 
 app.Run();
 
 class AppDbContext
 {
-    public List<Game> Games { get; set; } = new List<Game>()
+    public List<Player> Players { get; set; } 
+    public List<Game> Games { get; set; } 
+
+    public AppDbContext()
     {
-        new Game(),
-        new Game()
-    };
-    public List<Player> Players { get; set; } = new List<Player>()
-    {
-        new Player(),
-        new Player(),
-        new Player()
-    };
+        Players = new List<Player>()
+        {
+            new Player(),
+            new Player(),
+            new Player()
+        };
+
+        Games = new List<Game>()
+        {
+
+            new Game()
+            {
+                Player1_Id = Players[0].Player_Id,
+                Winner = null,
+                CurrentTurn_Id = Players[0].Player_Id,
+                
+                
+
+            }
+        };
+    }
 
 }
 
