@@ -1,4 +1,5 @@
 ﻿using xo.Api.Dtos.GameDtos;
+using xo.Api.Dtos.PlayerDtos;
 
 namespace xo.Api.Entities
 {
@@ -11,12 +12,23 @@ namespace xo.Api.Entities
             {
                 Game_Id = this.Game_Id,
                 Board = this.Board,
-                Player1 = players.Where(p => p.Player_Id == this.Player1_Id).FirstOrDefault()!,
-                Winner = (this.Winner_Id is null) ? null : players.Where(p => p.Player_Id == this.Winner_Id).FirstOrDefault()!,
-                CurrentTurn = players.Where(p => p.Player_Id == this.CurrentTurn_Id).FirstOrDefault()!,
-                Player2 = players.Where(p => p.Player_Id == this.Player2_Id).FirstOrDefault()!,
+                Player1 = players.Where(p => p.Player_Id == this.Player1_Id).First().ToDto(),
+                Winner = getPlayerOrNull((this.Winner_Id is null) ? null : players.Where(p => p.Player_Id == this.Winner_Id).FirstOrDefault()) ,
+                CurrentTurn = players.Where(p => p.Player_Id == this.CurrentTurn_Id).First().ToDto(),
+                Player2 = getPlayerOrNull(players.Where(p => p.Player_Id == this.Player2_Id).FirstOrDefault()),
                 IsGameOver = this.IsGameOver
             };
+
+            PlayerReadDto? getPlayerOrNull(Player? player)
+            {
+                
+                if(player is null)
+                {
+                    return null;
+                }
+
+                return player.ToDto();
+            }
         }
 
         public enum enWinner { GameOnGoing = 0, X_Win = 1, O_Win = 2, Draw = -1 }

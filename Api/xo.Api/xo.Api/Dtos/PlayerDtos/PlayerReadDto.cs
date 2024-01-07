@@ -1,6 +1,6 @@
 ﻿namespace xo.Api.Dtos.PlayerDtos
 {
-    public class PlayerDto
+    public class PlayerReadDto
     {
         public int Player_Id { get; set; }
         public string Name { get; set; } = "";

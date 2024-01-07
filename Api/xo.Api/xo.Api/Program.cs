@@ -1,5 +1,5 @@
 
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -16,7 +16,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<DataLayer>();
 builder.Services.AddCors();
-builder.Services.AddAuthentication(AuthService.Scheme.Cookie);
+builder.Services.AddAuthentication(AuthService.Scheme.Cookie)
+    .AddCookie(AuthService.Scheme.Cookie);
+
 builder.Services.AddAuthorization(conf =>
 {
     conf.AddPolicy(AuthService.Policy.UserExist, p =>
@@ -193,7 +195,7 @@ app.MapPost("/v2/register", async (DataLayer db,[FromBody] PlayerRegisterDto pla
     return Results.Created($"/players/{player.Player_Id}",player.ToDto());
 });
 
-app.MapPost("/v2/login", async (DataLayer db, [FromBody] PlayerLoginDto playerLogin) =>
+app.MapPost("/v2/login", async (HttpContext ctx,DataLayer db, [FromBody] PlayerLoginDto playerLogin) =>
 {
     Player? player = await db.Players.Where(p => p.Name == playerLogin.Name).FirstOrDefaultAsync();
 
@@ -207,9 +209,46 @@ app.MapPost("/v2/login", async (DataLayer db, [FromBody] PlayerLoginDto playerLo
         return Results.Unauthorized();
     }
 
-    return Results.Ok(player.ToDto());
+    PlayerReadDto playerDto = player.ToDto();
+
+    await ctx.SignInAsync(AuthService.Scheme.Cookie, AuthService.LoginPlayer(playerDto,AuthService.Scheme.Cookie));
+
+    return Results.Ok(playerDto);
 });
 
+app.MapGet("v2/games/join", async (HttpContext ctx,DataLayer db) =>
+{
+    int player_id = Convert.ToInt32( ctx.User.FindFirst(AuthService.Claims.PlayerId)!.Value );
+
+    Game? game = db.Games.Where(g => g.Player2_Id == null).FirstOrDefault();
+
+    if (game == null)
+    {
+        game = new Game()
+        {
+            Game_Id = default,
+            Player1_Id = player_id,
+            CurrentTurn_Id = player_id
+        };
+
+        db.Games.Add(game);
+    }
+    else
+    {
+        game.Player2_Id = player_id;
+    }
+
+
+    await db.SaveChangesAsync();
+
+    return Results.Ok(game.ToDto(db.Players));
+}).RequireAuthorization(AuthService.Policy.UserExist);
+
+//app.MapGet("v2/try-login-with-cookie", (HttpContent ctx ) =>
+//{
+//    return "Not implimented";
+//});
+// Test
 app.MapGet("/v2/games-list-auth", (DataLayer db) =>
 {
     return db.Games.ToList();
@@ -219,7 +258,5 @@ app.MapGet("/v2/games-list-no-auth", (DataLayer db) =>
 {
     return db.Games.ToList();
 });
-
-
 
 app.Run("http://localhost:5000");

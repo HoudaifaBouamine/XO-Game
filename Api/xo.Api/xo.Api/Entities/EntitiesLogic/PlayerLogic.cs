@@ -5,9 +5,9 @@ namespace xo.Api.Entities
     public partial class Player
     {
 
-        public PlayerDto ToDto()
+        public PlayerReadDto ToDto()
         {
-            return new PlayerDto
+            return new PlayerReadDto
             {
                 Player_Id = this.Player_Id,
                 Name = this.Name
