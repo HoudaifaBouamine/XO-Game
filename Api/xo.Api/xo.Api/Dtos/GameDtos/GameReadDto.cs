@@ -4,7 +4,7 @@ namespace xo.Api.Dtos.GameDtos
 {
     public class GameReadDto
     {
-        public Guid Game_Id { get; set; }
+        public int Game_Id { get; set; }
         public string Board { get; set; } = "#########";
         public Player Player1 { get; set; } = null!;
         public Player? Player2 { get; set; } = null;

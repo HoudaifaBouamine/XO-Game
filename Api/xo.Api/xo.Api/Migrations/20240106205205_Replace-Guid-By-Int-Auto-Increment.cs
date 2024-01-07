@@ -1,12 +1,11 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace xo.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreation : Migration
+    public partial class ReplaceGuidByIntAutoIncrement : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +14,8 @@ namespace xo.Api.Migrations
                 name: "Players",
                 columns: table => new
                 {
-                    Player_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Player_Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -27,12 +27,13 @@ namespace xo.Api.Migrations
                 name: "Games",
                 columns: table => new
                 {
-                    Game_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Game_Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Board = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Player1_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Player2_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CurrentTurn_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Winner_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Player1_Id = table.Column<int>(type: "int", nullable: false),
+                    Player2_Id = table.Column<int>(type: "int", nullable: true),
+                    CurrentTurn_Id = table.Column<int>(type: "int", nullable: false),
+                    Winner_Id = table.Column<int>(type: "int", nullable: true),
                     IsGameOver = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>

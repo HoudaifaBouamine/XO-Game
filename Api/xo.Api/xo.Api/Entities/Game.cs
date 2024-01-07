@@ -7,25 +7,25 @@ namespace xo.Api.Entities
     public partial class Game
     {
         [Key]
-        public Guid Game_Id { get; set; }
+        public int Game_Id { get; set; }
 
         public string Board { get; set; } = "#########";
 
         [ForeignKey(nameof(Player1))]
-        public Guid Player1_Id { get; set; }
+        public int Player1_Id { get; set; }
         public Player Player1 { get; set; } = null!;
         
         
         [ForeignKey(nameof(Player2))]
-        public Guid? Player2_Id { get; set;}
+        public int? Player2_Id { get; set;}
         public Player? Player2 { get; set; } = null;
 
         [ForeignKey(nameof(CurrentTurn))]
-        public Guid CurrentTurn_Id { get; set; }
+        public int CurrentTurn_Id { get; set; }
         public Player CurrentTurn { get; set; } = null!;
 
         [ForeignKey(nameof(Winner))]
-        public Guid? Winner_Id { get;set; }
+        public int? Winner_Id { get;set; }
         public Player? Winner { get; set; } = null;
         public bool IsGameOver { get; set; } = false;
     }

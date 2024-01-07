@@ -11,9 +11,9 @@ using xo.Api.Data;
 
 namespace xo.Api.Migrations
 {
-    [DbContext(typeof(Data.DataLayer))]
-    [Migration("20231225091523_InitCreation")]
-    partial class InitCreation
+    [DbContext(typeof(DataLayer))]
+    [Migration("20240106223920_Add-HasedPassword-To-Player")]
+    partial class AddHasedPasswordToPlayer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,28 +27,30 @@ namespace xo.Api.Migrations
 
             modelBuilder.Entity("xo.Api.Entities.Game", b =>
                 {
-                    b.Property<Guid>("Game_Id")
+                    b.Property<int>("Game_Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Game_Id"));
 
                     b.Property<string>("Board")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CurrentTurn_Id")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CurrentTurn_Id")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsGameOver")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("Player1_Id")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Player1_Id")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("Player2_Id")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("Player2_Id")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("Winner_Id")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("Winner_Id")
+                        .HasColumnType("int");
 
                     b.HasKey("Game_Id");
 
@@ -65,9 +67,14 @@ namespace xo.Api.Migrations
 
             modelBuilder.Entity("xo.Api.Entities.Player", b =>
                 {
-                    b.Property<Guid>("Player_Id")
+                    b.Property<int>("Player_Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Player_Id"));
+
+                    b.Property<string>("HashedPassword")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()

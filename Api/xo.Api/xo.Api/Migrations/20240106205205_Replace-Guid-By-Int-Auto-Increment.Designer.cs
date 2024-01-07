@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using xo.Api.Data;
 
@@ -11,9 +12,11 @@ using xo.Api.Data;
 namespace xo.Api.Migrations
 {
     [DbContext(typeof(DataLayer))]
-    partial class DataLayerModelSnapshot : ModelSnapshot
+    [Migration("20240106205205_Replace-Guid-By-Int-Auto-Increment")]
+    partial class ReplaceGuidByIntAutoIncrement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,9 +72,6 @@ namespace xo.Api.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Player_Id"));
-
-                    b.Property<string>("HashedPassword")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
