@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -244,10 +245,29 @@ app.MapGet("v2/games/join", async (HttpContext ctx,DataLayer db) =>
     return Results.Ok(game.ToDto(db.Players));
 }).RequireAuthorization(AuthService.Policy.UserExist);
 
-//app.MapGet("v2/try-login-with-cookie", (HttpContent ctx ) =>
-//{
-//    return "Not implimented";
-//});
+app.MapGet("v2/try-login-with-cookie", async (HttpContext ctx,DataLayer db) =>
+{
+    var id_claim = ctx.User.FindFirst(AuthService.Claims.PlayerId);
+
+    if(id_claim is null)
+    {
+        return Results.NotFound("id claim not found");
+    }
+
+    int id = Convert.ToInt32(id_claim.Value);
+
+    Player? player = await db.Players.Where(p => p.Player_Id == id).FirstOrDefaultAsync();
+
+    if(player is null) 
+    {
+        return Results.NotFound("user with this cookie not found");   
+    } 
+
+    return Results.Ok(player.ToDto());
+
+}).RequireAuthorization(AuthService.Policy.UserExist);
+
+
 // Test
 app.MapGet("/v2/games-list-auth", (DataLayer db) =>
 {
