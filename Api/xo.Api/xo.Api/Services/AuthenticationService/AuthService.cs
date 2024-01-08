@@ -1,11 +1,11 @@
 ﻿using System.Security.Claims;
 using xo.Api.Dtos.PlayerDtos;
 
-namespace xo.Api
+namespace xo.Api.Services.AuthenticationService
 {
     public class AuthService
     {
-        
+
         public class Scheme
         {
             public const string Cookie = "cookie";
@@ -16,14 +16,14 @@ namespace xo.Api
             public const string UserExist = "user-exist";
         }
 
-        public static ClaimsPrincipal LoginPlayer(PlayerReadDto player,string AuthScheme)
+        public static ClaimsPrincipal LoginPlayer(PlayerReadDto player, string AuthScheme)
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(Claims.PlayerName,player.Name),
                 new Claim(Claims.PlayerId,player.Player_Id.ToString())
             };
-            ClaimsIdentity identity = new ClaimsIdentity(claims,AuthScheme);
+            ClaimsIdentity identity = new ClaimsIdentity(claims, AuthScheme);
             return new ClaimsPrincipal(identity);
         }
 

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Security.Cryptography;
 
-namespace xo.Api.NewFolder
+namespace xo.Api.Services.SecurityService
 {
     public class SecurityService
     {
@@ -17,7 +17,7 @@ namespace xo.Api.NewFolder
         private static string sha256(string randomString)
         {
             var crypt = new SHA256Managed();
-            string hash = String.Empty;
+            string hash = string.Empty;
             byte[] crypto = crypt.ComputeHash(Encoding.ASCII.GetBytes(randomString));
             foreach (byte theByte in crypto)
             {
